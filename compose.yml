@@ -1,0 +1,11 @@
+services:
+  dbservice:
+    image: mysql:latest
+    container_name: jobportal_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: jobportal
+    volumes:
+      - /home/aldod/Documents/spring-sql-docker-vol:/var/lib/mysql
