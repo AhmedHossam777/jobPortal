@@ -1,7 +1,8 @@
 services:
   dbservice:
-    image: mysql:latest
+    image: mysql:9.7
     container_name: jobportal_db
+    user: "1000:1000"
     ports:
       - "3306:3306"
     environment:
