@@ -1,11 +1,12 @@
-package com.ahmed.learning.jobportal.service.impl;
+package com.ahmed.learning.jobportal.contact.service.impl;
 
+import com.ahmed.learning.jobportal.contact.service.IContactService;
 import com.ahmed.learning.jobportal.dto.ContactDto;
 import com.ahmed.learning.jobportal.entity.Contact;
 import com.ahmed.learning.jobportal.repository.ContactRepository;
-import com.ahmed.learning.jobportal.service.IContactUsService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ContactUsServiceImpl implements IContactUsService {
+public class ContactServiceImpl implements IContactService {
 	private final ContactRepository contactRepository;
 
 	@Override
@@ -23,17 +24,14 @@ public class ContactUsServiceImpl implements IContactUsService {
 	}
 
 	@Override
-	public ContactDto saveContactUs(ContactDto contactDto) {
-		Contact contact = new Contact();
-		applyDtoToContact(contactDto, contact);
-		contact.setCreatedAt(Instant.now());
-		contact.setUpdatedAt(Instant.now());
-		contact.setCreatedBy("SYSTEM");
-		if (contact.getStatus() == null) {
-			contact.setStatus("NEW");
+	public boolean saveContactUs(ContactDto contactDto) {
+		boolean result = false;
+		Contact contact = contactRepository.save(transformToEntity(contactDto));
+		if (contact != null && contact.getId() != null) {
+			result = true;
 		}
-		Contact saved = contactRepository.save(contact);
-		return contactToContactDto(saved);
+
+		return result;
 	}
 
 	@Override
@@ -74,14 +72,13 @@ public class ContactUsServiceImpl implements IContactUsService {
 		);
 	}
 
-	private void applyDtoToContact(ContactDto contactDto, Contact contact) {
-		contact.setEmail(contactDto.email());
-		contact.setMessage(contactDto.message());
-		contact.setName(contactDto.name());
-		contact.setSubject(contactDto.subject());
-		contact.setUserType(contactDto.userType());
-		if (contactDto.status() != null) {
-			contact.setStatus(contactDto.status());
-		}
+	private Contact transformToEntity(ContactDto contactDto) {
+		Contact contact = new Contact();
+		BeanUtils.copyProperties(contactDto, contact);
+		contact.setCreatedAt(Instant.now());
+		contact.setCreatedBy("SYSTEM");
+		contact.setStatus("NEW");
+
+		return contact;
 	}
 }

@@ -1,9 +1,9 @@
-package com.ahmed.learning.jobportal.service.impl;
+package com.ahmed.learning.jobportal.company.service.impl;
 
+import com.ahmed.learning.jobportal.company.service.ICompanyService;
 import com.ahmed.learning.jobportal.dto.CompanyDto;
 import com.ahmed.learning.jobportal.entity.Company;
 import com.ahmed.learning.jobportal.repository.CompanyInterface;
-import com.ahmed.learning.jobportal.service.ICompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +22,12 @@ public class CompanyServiceImpl implements ICompanyService {
 
 	private CompanyDto companyToCompanyDto(Company company) {
 		return new CompanyDto(company.getId(), company.getName(),
-						company.getLogo(), company.getIndustry(), company.getDescription()
-						, company.getSize(), company.getRating(), company.getLocations(),
-						company.getFounded(), company.getEmployees(), company.getWebsite()
+						company.getLogo(), company.getIndustry(),
+						company.getDescription()
+						, company.getSize(), company.getRating(),
+						company.getLocations(),
+						company.getFounded(), company.getEmployees(),
+						company.getWebsite()
 						, company.getCreatedAt());
 	}
 }

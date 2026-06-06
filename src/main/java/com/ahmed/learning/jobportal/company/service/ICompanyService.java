@@ -1,4 +1,4 @@
-package com.ahmed.learning.jobportal.service;
+package com.ahmed.learning.jobportal.company.service;
 
 import com.ahmed.learning.jobportal.dto.CompanyDto;
 

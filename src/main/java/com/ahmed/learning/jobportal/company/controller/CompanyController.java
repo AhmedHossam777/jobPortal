@@ -1,7 +1,7 @@
 package com.ahmed.learning.jobportal.company.controller;
 
+import com.ahmed.learning.jobportal.company.service.ICompanyService;
 import com.ahmed.learning.jobportal.dto.CompanyDto;
-import com.ahmed.learning.jobportal.service.ICompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

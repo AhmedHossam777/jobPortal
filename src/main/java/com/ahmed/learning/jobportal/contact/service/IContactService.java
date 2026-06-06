@@ -1,13 +1,13 @@
-package com.ahmed.learning.jobportal.service;
+package com.ahmed.learning.jobportal.contact.service;
 
 import com.ahmed.learning.jobportal.dto.ContactDto;
 
 import java.util.List;
 
-public interface IContactUsService {
+public interface IContactService {
 	List<ContactDto> getAllContactUs();
 
-	ContactDto saveContactUs(ContactDto contactDto);
+	boolean saveContactUs(ContactDto contactDto);
 
 	ContactDto getContactUsById(Long id);
 

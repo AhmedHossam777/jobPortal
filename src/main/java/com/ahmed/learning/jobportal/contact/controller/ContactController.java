@@ -1,7 +1,7 @@
-package com.ahmed.learning.jobportal.company.controller;
+package com.ahmed.learning.jobportal.contact.controller;
 
+import com.ahmed.learning.jobportal.contact.service.IContactService;
 import com.ahmed.learning.jobportal.dto.ContactDto;
-import com.ahmed.learning.jobportal.service.IContactUsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +12,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/contacts")
 @RequiredArgsConstructor
-public class ContactUsController {
-	private final IContactUsService contactUsService;
+public class ContactController {
+	private final IContactService contactUsService;
 
 	@PostMapping
-	public ResponseEntity<ContactDto> create(@RequestBody ContactDto contactDto) {
-		ContactDto created = contactUsService.saveContactUs(contactDto);
-		return ResponseEntity.ok(created);
+	public ResponseEntity<String> create(@RequestBody ContactDto contactDto) {
+		boolean created = contactUsService.saveContactUs(contactDto);
+		if (created) {
+			return ResponseEntity
+							.status(HttpStatus.CREATED)
+							.body("Request processed successfully!");
+		} else {
+			return ResponseEntity
+							.status(HttpStatus.INTERNAL_SERVER_ERROR)
+							.body("Request processed failed!");
+		}
 	}
 
 	@GetMapping
