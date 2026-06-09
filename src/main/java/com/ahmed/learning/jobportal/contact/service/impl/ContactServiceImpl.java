@@ -2,6 +2,7 @@ package com.ahmed.learning.jobportal.contact.service.impl;
 
 import com.ahmed.learning.jobportal.contact.service.IContactService;
 import com.ahmed.learning.jobportal.dto.ContactDto;
+import com.ahmed.learning.jobportal.dto.ContactResponseDto;
 import com.ahmed.learning.jobportal.entity.Contact;
 import com.ahmed.learning.jobportal.repository.ContactRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,7 +19,7 @@ public class ContactServiceImpl implements IContactService {
 	private final ContactRepository contactRepository;
 
 	@Override
-	public List<ContactDto> getAllContactUs() {
+	public List<ContactResponseDto> getAllContactUs() {
 		List<Contact> contactList = contactRepository.findAll();
 		return contactList.stream().map(this::contactToContactDto).toList();
 	}
@@ -35,7 +36,7 @@ public class ContactServiceImpl implements IContactService {
 	}
 
 	@Override
-	public ContactDto getContactUsById(Long id) {
+	public ContactResponseDto getContactUsById(Long id) {
 		Contact contact = contactRepository
 						.findById(id)
 						.orElseThrow(() -> new EntityNotFoundException("Contact not " +
@@ -45,7 +46,7 @@ public class ContactServiceImpl implements IContactService {
 	}
 
 	@Override
-	public ContactDto updateContactUs(Long id, ContactDto contactDto) {
+	public ContactResponseDto updateContactUs(Long id, ContactDto contactDto) {
 		Contact contact = contactRepository
 						.findById(id)
 						.orElseThrow(() -> new EntityNotFoundException("Contact not " +
@@ -64,9 +65,10 @@ public class ContactServiceImpl implements IContactService {
 		contactRepository.deleteById(id);
 	}
 
-	private ContactDto contactToContactDto(Contact contact) {
-		return new ContactDto(
-						contact.getId(), contact.getEmail(),
+	private ContactResponseDto contactToContactDto(Contact contact) {
+		return new ContactResponseDto(
+						contact.getId(),
+						contact.getEmail(),
 						contact.getMessage(), contact.getName(), contact.getStatus(),
 						contact.getSubject(), contact.getUserType()
 		);

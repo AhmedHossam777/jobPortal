@@ -2,9 +2,13 @@ package com.ahmed.learning.jobportal.contact.controller;
 
 import com.ahmed.learning.jobportal.contact.service.IContactService;
 import com.ahmed.learning.jobportal.dto.ContactDto;
+import com.ahmed.learning.jobportal.dto.ContactResponseDto;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +20,7 @@ public class ContactController {
 	private final IContactService contactUsService;
 
 	@PostMapping
-	public ResponseEntity<String> create(@RequestBody ContactDto contactDto) {
+	public ResponseEntity<String> create(@RequestBody @Valid ContactDto contactDto) {
 		boolean created = contactUsService.saveContactUs(contactDto);
 		if (created) {
 			return ResponseEntity
@@ -31,23 +35,24 @@ public class ContactController {
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public ResponseEntity<List<ContactDto>> findAll() {
-		List<ContactDto> allContactUs = contactUsService.getAllContactUs();
+	public ResponseEntity<List<ContactResponseDto>> findAll() {
+		List<ContactResponseDto> allContactUs = contactUsService.getAllContactUs();
 		return ResponseEntity.ok(allContactUs);
 	}
 
 	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public ResponseEntity<ContactDto> findOne(@PathVariable Long id) {
-		ContactDto contact = contactUsService.getContactUsById(id);
+	public ResponseEntity<ContactResponseDto> findOne(@PathVariable Long id) {
+		ContactResponseDto contact = contactUsService.getContactUsById(id);
 		return ResponseEntity.ok(contact);
 	}
 
 	@PutMapping("/{id}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public ResponseEntity<ContactDto> updateOne(@PathVariable Long id,
-	                                            @RequestBody ContactDto contactDto) {
-		ContactDto contact = contactUsService.updateContactUs(id, contactDto);
+	public ResponseEntity<ContactResponseDto> updateOne(@PathVariable Long id,
+	                                                    @RequestBody ContactDto contactDto) {
+		ContactResponseDto contact = contactUsService.updateContactUs(id,
+						contactDto);
 		return ResponseEntity.ok(contact);
 	}
 
@@ -56,4 +61,11 @@ public class ContactController {
 		contactUsService.deleteContactUs(id);
 		return ResponseEntity.noContent().build();
 	}
+
+	@GetMapping("/open-conctact")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public ResponseEntity<String> fetchOpenContacts(@RequestParam @Validated @NotBlank(message = "Status is required") String status) {
+		return ResponseEntity.ok("These are the contacts with the given status " + status);
+	}
+
 }

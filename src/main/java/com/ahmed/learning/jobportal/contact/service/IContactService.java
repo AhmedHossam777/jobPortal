@@ -1,17 +1,18 @@
 package com.ahmed.learning.jobportal.contact.service;
 
 import com.ahmed.learning.jobportal.dto.ContactDto;
+import com.ahmed.learning.jobportal.dto.ContactResponseDto;
 
 import java.util.List;
 
 public interface IContactService {
-	List<ContactDto> getAllContactUs();
+	List<ContactResponseDto> getAllContactUs();
 
 	boolean saveContactUs(ContactDto contactDto);
 
-	ContactDto getContactUsById(Long id);
+	ContactResponseDto getContactUsById(Long id);
 
 	void deleteContactUs(Long id);
 
-	ContactDto updateContactUs(Long id, ContactDto contactDto);
+	ContactResponseDto updateContactUs(Long id, ContactDto contactDto);
 }
