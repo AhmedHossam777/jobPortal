@@ -1,6 +1,7 @@
 package com.ahmed.learning.jobportal.exception;
 
 import com.ahmed.learning.jobportal.dto.ErrorResponseDto;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -76,6 +77,18 @@ public class GlobalExceptionHandler {
 			errors.put(paramName, combinedMessages);
 		});
 		return ResponseEntity.badRequest().body(errors);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	ResponseEntity<ErrorResponseDto> handleException(ConstraintViolationException exception, WebRequest webRequest
+	) {
+		ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+						webRequest.getDescription(false), HttpStatus.BAD_REQUEST
+						, exception.getMessage(), LocalDateTime.now()
+		);
+
+		return new ResponseEntity<>(errorResponseDto,
+						HttpStatus.BAD_REQUEST);
 	}
 
 }

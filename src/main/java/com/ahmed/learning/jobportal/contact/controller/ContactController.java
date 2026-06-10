@@ -16,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/contacts")
 @RequiredArgsConstructor
+@Validated
 public class ContactController {
 	private final IContactService contactUsService;
 
@@ -64,7 +65,7 @@ public class ContactController {
 
 	@GetMapping("/open-conctact")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public ResponseEntity<String> fetchOpenContacts(@RequestParam @Validated @NotBlank(message = "Status is required") String status) {
+	public ResponseEntity<String> fetchOpenContacts(@RequestParam @NotBlank(message = "Status is required in query params") String status) {
 		return ResponseEntity.ok("These are the contacts with the given status " + status);
 	}
 
