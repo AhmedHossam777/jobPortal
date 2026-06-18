@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "com.ahmed.learning.jobportal")
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(Exception.class)

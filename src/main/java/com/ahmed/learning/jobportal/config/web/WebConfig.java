@@ -2,6 +2,7 @@ package com.ahmed.learning.jobportal.config.web;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
@@ -20,9 +21,9 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void configurePathMatch(PathMatchConfigurer configurer) {
-		// this lambda expression usage is to know or filter controllers that
-		// should have that /api prefix
-		configurer.addPathPrefix("/api", _ -> true);
+		configurer.addPathPrefix("/api",
+						HandlerTypePredicate.forBasePackage("com.ahmed.learning" +
+										".jobportal"));
 	}
 
 	@Override
