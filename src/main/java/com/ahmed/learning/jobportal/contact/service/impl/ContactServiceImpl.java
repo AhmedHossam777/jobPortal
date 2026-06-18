@@ -77,9 +77,9 @@ public class ContactServiceImpl implements IContactService {
 	private Contact transformToEntity(ContactDto contactDto) {
 		Contact contact = new Contact();
 		BeanUtils.copyProperties(contactDto, contact);
-		contact.setCreatedAt(Instant.now());
-		contact.setCreatedBy("SYSTEM");
 		contact.setStatus("NEW");
+//		contact.setCreatedAt(Instant.now());
+//		contact.setCreatedBy("SYSTEM");
 
 		return contact;
 	}
