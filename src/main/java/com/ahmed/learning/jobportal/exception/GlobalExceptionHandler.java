@@ -1,6 +1,7 @@
 package com.ahmed.learning.jobportal.exception;
 
 import com.ahmed.learning.jobportal.dto.ErrorResponseDto;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,19 @@ public class GlobalExceptionHandler {
 
 		return new ResponseEntity<>(errorResponseDto,
 						HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	@ExceptionHandler(EntityNotFoundException.class)
+	ResponseEntity<ErrorResponseDto> handleEntityNotFoundException(Exception exception, WebRequest webRequest) {
+		ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+						webRequest.getDescription(false), HttpStatus.NOT_FOUND
+						,
+						"Entity with provided id is not found: " + exception.getMessage(),
+						LocalDateTime.now()
+		);
+
+		return new ResponseEntity<>(errorResponseDto,
+						HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
