@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.servlet.config.annotation.ApiVersionConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -25,13 +24,5 @@ public class WebConfig implements WebMvcConfigurer {
 						HandlerTypePredicate.forBasePackage("com.ahmed.learning" +
 										".jobportal"));
 	}
-
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry
-						.addMapping("/api/**")
-						.allowedOrigins("http://localhost:4200", "http://localhost:3000")
-						.allowedMethods("*").allowedHeaders("*").exposedHeaders("*")
-						.allowCredentials(true).maxAge(3600);
-	}
+	
 }
