@@ -16,14 +16,9 @@ import java.util.List;
 public class CompanyController {
 	private final ICompanyService companyService;
 
-	@GetMapping(version = "1.0")
+	@GetMapping(path = "/public", version = "1.0")
 	public ResponseEntity<List<CompanyDto>> getCompanies() {
 		List<CompanyDto> companyList = companyService.getAllCompanies();
 		return ResponseEntity.ok(companyList);
-	}
-
-	@GetMapping(version = "2.0")
-	public ResponseEntity<String> getCompanies2() {
-		return ResponseEntity.ok("Company List2 updated");
 	}
 }

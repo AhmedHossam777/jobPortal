@@ -20,7 +20,7 @@ import java.util.List;
 public class ContactController {
 	private final IContactService contactUsService;
 
-	@PostMapping
+	@PostMapping(path = "/public", version = "1.0")
 	public ResponseEntity<String> create(@RequestBody @Valid ContactDto contactDto) {
 		boolean created = contactUsService.saveContactUs(contactDto);
 		if (created) {
