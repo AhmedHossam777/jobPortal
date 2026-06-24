@@ -11,6 +11,7 @@ public class PathConfig {
 	public List<String> publicPaths() {
 		return List.of(
 						"/api/companies/public",
+						"/api/auth/login/public",
 						"/api/contacts/public",
 						"/api/swagger-ui.html",
 						"/swagger-ui/**",
