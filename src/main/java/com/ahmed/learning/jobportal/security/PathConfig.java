@@ -13,11 +13,10 @@ public class PathConfig {
 						"/api/companies/public",
 						"/api/auth/login/public",
 						"/api/contacts/public",
-						"/api/swagger-ui.html",
-						"/swagger-ui/**",
-						"/api/v3/api-docs/**",
-						"/swagger-resources/**",
 						"/swagger-ui.html",
+						"/swagger-ui/**",
+						"/v3/api-docs/**",
+						"/swagger-resources/**",
 						"/webjars/**"
 		);
 	}

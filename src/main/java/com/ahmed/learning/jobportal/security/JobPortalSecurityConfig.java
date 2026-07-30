@@ -90,9 +90,9 @@ public class JobPortalSecurityConfig {
 
 	@Bean
 	public AuthenticationManager authenticationManager() {
-		var authenticationProvider = new DaoAuthenticationProvider(userDetailsService());
+		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService());
 		authenticationProvider.setPasswordEncoder(passwordEncoder());
-		
+
 		return new ProviderManager(authenticationProvider);
 	}
 }
