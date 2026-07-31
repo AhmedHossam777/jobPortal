@@ -1,9 +1,12 @@
 package com.ahmed.learning.jobportal.security;
 
+import com.ahmed.learning.jobportal.constants.ApplicationConstants;
+import com.ahmed.learning.jobportal.security.filter.JwtTokenValidatorFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,7 +40,12 @@ public class JobPortalSecurityConfig {
 	private final List<String> securedPaths;
 
 	@Bean
-	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) {
+	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, Environment env) {
+		// resolved here, not inside the filter: a filter registered with addFilterBefore is
+		// not a bean, so its own getEnvironment() would not see the application properties
+		String jwtSecret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY,
+						ApplicationConstants.JWT_DEFAULT_VALUE);
+
 		return http
 						.csrf(AbstractHttpConfigurer::disable)
 						.cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
@@ -44,7 +53,7 @@ public class JobPortalSecurityConfig {
 							publicPaths.forEach(publicPath -> requests.requestMatchers(publicPath).permitAll());
 							securedPaths.forEach(securedPath -> requests.requestMatchers(securedPath).authenticated());
 							requests.anyRequest().denyAll();
-						})
+						}).addFilterBefore(new JwtTokenValidatorFilter(publicPaths, jwtSecret), BasicAuthenticationFilter.class)
 						.formLogin(AbstractHttpConfigurer::disable)
 						.httpBasic(withDefaults())
 						.build();

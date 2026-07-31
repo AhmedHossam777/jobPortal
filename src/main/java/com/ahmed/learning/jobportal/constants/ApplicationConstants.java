@@ -6,6 +6,8 @@ public class ApplicationConstants {
 	// Development fallback only; override with the JWT_SECRET environment variable.
 	public static final String JWT_DEFAULT_VALUE = "ahmeddada111_dev_only_secret_key_change_me";
 
+	public static final String JWT_HEADER = "Authorization";
+
 	private ApplicationConstants() {
 		throw new AssertionError("Cannot instantiate ApplicationConstants");
 	}
