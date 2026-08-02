@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS roles
 CREATE TABLE IF NOT EXISTS users
 (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username      VARCHAR(50)                           NOT NULL UNIQUE,
+    username      VARCHAR(50)                           NOT NULL,
     email         VARCHAR(255)                          NOT NULL UNIQUE,
     password_hash VARCHAR(500)                          NOT NULL,
     mobile_number VARCHAR(20) UNIQUE,
@@ -92,3 +92,5 @@ CREATE TABLE IF NOT EXISTS users
     CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES roles (id),
     CONSTRAINT fk_company FOREIGN KEY (company_id) REFERENCES companies (id) ON DELETE SET NULL
 );
+
+# drop table users;

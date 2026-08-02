@@ -8,6 +8,10 @@ public class ApplicationConstants {
 
 	public static final String JWT_HEADER = "Authorization";
 
+	public static final String ROLE_JOB_SEEKER = "ROLE_JOB_SEEKER";
+	public static final String ROLE_EMPLOYER = "ROLE_EMPLOYER";
+	public static final String ROLE_ADMIN = "ROLE_ADMIN";
+
 	private ApplicationConstants() {
 		throw new AssertionError("Cannot instantiate ApplicationConstants");
 	}

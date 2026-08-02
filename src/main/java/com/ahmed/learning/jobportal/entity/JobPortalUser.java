@@ -46,5 +46,4 @@ public class JobPortalUser extends BaseEntity {
 	@OnDelete(action = OnDeleteAction.SET_NULL)
 	@JoinColumn(name = "company_id")
 	private Company company;
-
 }
