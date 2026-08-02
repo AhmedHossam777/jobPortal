@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.password.CompromisedPasswordChecker;
+import org.springframework.security.authentication.password.CompromisedPasswordDecision;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,9 +41,9 @@ public class AuthController {
 	private final Logger logger = LoggerFactory.getLogger(AuthController.class);
 	private final JwtUtil jwtUtil;
 	private final HashingUtl hashingUtl;
-
 	private final JobPortalUserRepository jobPortalUserRepository;
 	private final RoleRepository roleRepository;
+	private final CompromisedPasswordChecker compromisedPasswordChecker;
 
 	@PostMapping(value = "/login/public")
 	public ResponseEntity<LoginResponseDto> login(@RequestBody @Validated LoginRequestDto loginRequestDto) {
@@ -74,8 +76,8 @@ public class AuthController {
 	public ResponseEntity<HashMap<String, String>> register(@RequestBody @Validated RegisterRequestDto registerRequestDto) {
 		Optional<JobPortalUser> existingUser = jobPortalUserRepository
 						.findByEmailOrMobileNumber(registerRequestDto.email(), registerRequestDto.mobileNumber());
+		HashMap<String, String> errors = new HashMap<>();
 		if (existingUser.isPresent()) {
-			HashMap<String, String> errors = new HashMap<>();
 			JobPortalUser jobPortalUser = existingUser.get();
 			if (jobPortalUser.getEmail().equalsIgnoreCase(registerRequestDto.email())) {
 				errors.put("email", "Email is already in use");
@@ -84,6 +86,13 @@ public class AuthController {
 				errors.put("email", "mobile number is already in use");
 			}
 
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+		}
+
+		CompromisedPasswordDecision compromisedPasswordDecision =
+						compromisedPasswordChecker.check(registerRequestDto.password());
+		if (compromisedPasswordDecision.isCompromised()) {
+			errors.put("password", "You provided a weak compromised password");
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
 		}
 
