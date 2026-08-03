@@ -8,20 +8,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -49,7 +48,9 @@ public class JobPortalSecurityConfig {
 						ApplicationConstants.JWT_DEFAULT_VALUE);
 
 		return http
-						.csrf(AbstractHttpConfigurer::disable)
+						.csrf(csrfConfig -> csrfConfig
+										.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+										.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
 						.cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
 						.authorizeHttpRequests((requests) -> {
 							publicPaths.forEach(publicPath -> requests.requestMatchers(publicPath).permitAll());
@@ -76,29 +77,7 @@ public class JobPortalSecurityConfig {
 	}
 
 	@Bean
-	public UserDetailsService userDetailsService() {
-
-		var user1 = User
-						.builder()
-						.username("aldod")
-						.password("$2a$10$98z28zfaehtyTdBbQuWJ4.lPv7Loa/FcSCg6a3NpxXc0ZcfMv2SmS")
-						.roles("USER")
-						.build();
-		var user2 = User
-						.builder()
-						.username("admin")
-						.password("$2a$10$BvEiq8ULNr.6/cnXmOG9huxX.MtXKs5NxXEIIT.b.rDXy6a8E95RO")
-						.roles("ADMIN")
-						.build();
-
-		return new InMemoryUserDetailsManager(user1, user2);
-	}
-
-	@Bean
-	public AuthenticationManager authenticationManager() {
-		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService());
-		authenticationProvider.setPasswordEncoder(passwordEncoder());
-
+	public AuthenticationManager authenticationManager(AuthenticationProvider authenticationProvider) {
 		return new ProviderManager(authenticationProvider);
 	}
 

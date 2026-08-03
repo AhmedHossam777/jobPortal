@@ -1,13 +1,13 @@
 package com.ahmed.learning.jobportal.security.util;
 
 import com.ahmed.learning.jobportal.constants.ApplicationConstants;
+import com.ahmed.learning.jobportal.entity.JobPortalUser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -24,13 +24,15 @@ public class JwtUtil {
 		String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_DEFAULT_VALUE);
 
 		SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-		var fetchedUser = (User) authentication.getPrincipal();
+		var fetchedUser = (JobPortalUser) authentication.getPrincipal();
 		jwtToken = Jwts
 						.builder()
 						.issuer("job portal")
 						.subject("JWT token")
 						.claim("username", fetchedUser.getUsername())
-						.claim("roles", fetchedUser
+						.claim("email", fetchedUser.getEmail())
+						.claim("mobileNumber", fetchedUser.getMobileNumber())
+						.claim("roles", authentication
 										.getAuthorities()
 										.stream()
 										.map(GrantedAuthority::getAuthority)
