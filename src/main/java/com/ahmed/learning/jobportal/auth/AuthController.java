@@ -22,7 +22,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
-import org.springframework.security.authentication.password.CompromisedPasswordDecision;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -84,28 +82,6 @@ public class AuthController {
 
 	@PostMapping(value = "/register/public")
 	public ResponseEntity<HashMap<String, String>> register(@RequestBody @Validated RegisterRequestDto registerRequestDto) {
-		Optional<JobPortalUser> existingUser = jobPortalUserRepository
-						.findByEmailOrMobileNumber(registerRequestDto.email(), registerRequestDto.mobileNumber());
-		HashMap<String, String> errors = new HashMap<>();
-		if (existingUser.isPresent()) {
-			JobPortalUser jobPortalUser = existingUser.get();
-			if (jobPortalUser.getEmail().equalsIgnoreCase(registerRequestDto.email())) {
-				errors.put("email", "Email is already in use");
-			}
-			if (jobPortalUser.getMobileNumber().equals(registerRequestDto.mobileNumber())) {
-				errors.put("email", "mobile number is already in use");
-			}
-
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-		}
-
-		CompromisedPasswordDecision compromisedPasswordDecision =
-						compromisedPasswordChecker.check(registerRequestDto.password());
-		if (compromisedPasswordDecision.isCompromised()) {
-			errors.put("password", "You provided a weak compromised password");
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-		}
-
 		JobPortalUser user = new JobPortalUser();
 		BeanUtils.copyProperties(registerRequestDto, user);
 		user.setPasswordHash(hashingUtl.hashPassword(registerRequestDto.password()));
