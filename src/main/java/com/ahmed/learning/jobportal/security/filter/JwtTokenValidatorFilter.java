@@ -12,10 +12,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,13 +31,16 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
 	private final List<String> publicPaths;
 	private final SecretKey secretKey;
+	private final AuthenticationEntryPoint authenticationEntryPoint;
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	private final Logger logger = LoggerFactory.getLogger(JwtTokenValidatorFilter.class);
 
-	public JwtTokenValidatorFilter(List<String> publicPaths, String secret) {
+	public JwtTokenValidatorFilter(List<String> publicPaths, String secret,
+	                               AuthenticationEntryPoint authenticationEntryPoint) {
 		this.publicPaths = publicPaths;
 		this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+		this.authenticationEntryPoint = authenticationEntryPoint;
 	}
 
 	@Override
@@ -45,7 +50,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 		String authHeader = request.getHeader(ApplicationConstants.JWT_HEADER);
 
 		// no bearer token here: leave the context anonymous and let the authorization
-		// rules reject the request, so basic auth still has a chance to run
+		// rules reject the request, which routes to the entry point with a JSON 401
 		if (null == authHeader || !authHeader.startsWith(BEARER_PREFIX)) {
 			filterChain.doFilter(request, response);
 			return;
@@ -64,11 +69,11 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		} catch (ExpiredJwtException e) {
-			rejectRequest(response, "Token has expired");
+			rejectRequest(request, response, "Token has expired");
 			return;
 		} catch (JwtException | IllegalArgumentException e) {
 			logger.warn("Rejected JWT: {}", e.getMessage());
-			rejectRequest(response, "Invalid token");
+			rejectRequest(request, response, "Invalid token");
 			return;
 		}
 
@@ -76,13 +81,13 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
-	private void rejectRequest(HttpServletResponse response, String message) throws IOException {
+	private void rejectRequest(HttpServletRequest request, HttpServletResponse response, String message)
+					throws IOException, ServletException {
 		// ExceptionTranslationFilter sits after this filter, so it cannot turn an
-		// exception thrown here into a 401 - write the response ourselves
+		// exception thrown here into a 401 - invoke the entry point ourselves so a
+		// rejected token answers in the same JSON shape as every other 401
 		SecurityContextHolder.clearContext();
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setContentType("text/plain;charset=UTF-8");
-		response.getWriter().write(message);
+		authenticationEntryPoint.commence(request, response, new BadCredentialsException(message));
 	}
 
 	@Override

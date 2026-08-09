@@ -2,6 +2,7 @@ package com.ahmed.learning.jobportal.security;
 
 import com.ahmed.learning.jobportal.constants.ApplicationConstants;
 import com.ahmed.learning.jobportal.security.filter.JwtTokenValidatorFilter;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +17,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -24,11 +27,10 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Collections;
 import java.util.List;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -41,11 +43,14 @@ public class JobPortalSecurityConfig {
 	private final List<String> securedPaths;
 
 	@Bean
-	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, Environment env) {
+	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, Environment env, ObjectMapper objectMapper) {
 		// resolved here, not inside the filter: a filter registered with addFilterBefore is
 		// not a bean, so its own getEnvironment() would not see the application properties
 		String jwtSecret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY,
 						ApplicationConstants.JWT_DEFAULT_VALUE);
+
+		AuthenticationEntryPoint authenticationEntryPoint = new JobPortalAuthenticationEntryPoint(objectMapper);
+		AccessDeniedHandler accessDeniedHandler = new JobPortalAccessDeniedHandler(objectMapper);
 
 		return http
 						.csrf(csrfConfig -> csrfConfig
@@ -53,12 +58,24 @@ public class JobPortalSecurityConfig {
 										.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
 						.cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
 						.authorizeHttpRequests((requests) -> {
+							// the chain also runs on the ERROR dispatch, where /error matches no rule
+							// and hits denyAll - without this every 404 and unhandled exception is
+							// rewritten into a misleading 401
+							requests.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll();
 							publicPaths.forEach(publicPath -> requests.requestMatchers(publicPath).permitAll());
 							securedPaths.forEach(securedPath -> requests.requestMatchers(securedPath).authenticated());
 							requests.anyRequest().denyAll();
-						}).addFilterBefore(new JwtTokenValidatorFilter(publicPaths, jwtSecret), BasicAuthenticationFilter.class)
+						})
+						.addFilterBefore(new JwtTokenValidatorFilter(publicPaths, jwtSecret, authenticationEntryPoint),
+										BasicAuthenticationFilter.class)
+						.exceptionHandling(exceptionConfig -> exceptionConfig
+										.authenticationEntryPoint(authenticationEntryPoint)
+										.accessDeniedHandler(accessDeniedHandler))
 						.formLogin(AbstractHttpConfigurer::disable)
-						.httpBasic(withDefaults())
+						// credentials are exchanged for a JWT at /api/auth/login/public, so there is no
+						// browser Basic auth to fall back on - and its entry point answered every
+						// rejection with a bodyless 401 that hid the real cause
+						.httpBasic(AbstractHttpConfigurer::disable)
 						.build();
 	}
 
