@@ -10,18 +10,19 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class LoggingAndPerformanceAspect {
+	//	@Around("@annotation(com.ahmed.learning.jobportal.aspects.LogAspect)")
 	@Around("execution(* com.ahmed.learning.jobportal..*.*(..))")
 	public Object logAndMeasureExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
 		long startTime = System.currentTimeMillis();
 		String methodName = joinPoint.getSignature().toShortString();
 		Object[] args = joinPoint.getArgs();
-		log.debug("-> Entering Method: {}", methodName);
-		log.debug("-> Arguments: {}", args);
+		log.info("-> Entering Method: {}", methodName);
+		log.info("-> Arguments: {}", args);
 
 		Object result = joinPoint.proceed();
 		long executionTime = System.currentTimeMillis() - startTime;
-		log.debug("-> Method executed successfully: {}", methodName);
-		log.debug("-> Execution time: {}", executionTime);
+		log.info("-> Method executed successfully: {}", methodName);
+		log.info("-> Execution time: {}", executionTime);
 
 		return result;
 	}
